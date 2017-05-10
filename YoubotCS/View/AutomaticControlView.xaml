@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="YoubotCS.View.AutomaticControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:local="clr-namespace:YoubotCS.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="552" d:DesignWidth="792">
+    <Grid>
+        <TextBlock FontSize="24" Text="{Binding Path=PageTitle}" />
+        <Image Height="240" Width="320" RenderTransformOrigin="0.5,0.5" Margin="10,10,450,292" Source="{Binding Path=Image}" />
+        <Button Content="LoadImage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="16,260,0,0" Command="{Binding Path=LoadImageCommand}" />
+        <Button Content="FindObstacles" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="96,260,0,0" Command="{Binding Path=FindObstaclesCommand}" />
+    </Grid>
+</UserControl>
