@@ -41,7 +41,7 @@ namespace YoubotCS.ViewModel
 		private void LoadAutomaticControlPage()
 		{
 			CurrentViewModel = new AutomaticControlViewModel(
-				new AutomaticControlPage() { PageTitle = "Automatic control page." });
+				new AutomaticControlPage());
 		}
 
 		private void LoadManualControlPage()

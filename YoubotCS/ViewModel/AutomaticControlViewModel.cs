@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,19 +29,6 @@ namespace YoubotCS.ViewModel
 			FindObstaclesCommand = new DelegateCommand(o => FindObstacles());
 		}
 
-		public string PageTitle
-		{
-			get
-			{
-				return Model.PageTitle;
-			}
-			set
-			{
-				Model.PageTitle = value;
-				OnPropertyChanged("PageTitle");
-			}
-		}
-
 		public BitmapImage Image
 		{
 			get { return Model.Image; }
@@ -50,25 +39,38 @@ namespace YoubotCS.ViewModel
 			}
 		}
 
+		public BitmapImage DepthImage
+		{
+			get { return Model.DepthImage; }
+			set
+			{
+				Model.DepthImage = value;
+				OnPropertyChanged("DepthImage");
+			}
+		}
+
 		private void LoadImage()
 		{
 			using (var openFileDialog = new OpenFileDialog())
 			{
 				if (openFileDialog.ShowDialog() == DialogResult.OK)
+				{
 					Image = new BitmapImage(new Uri(openFileDialog.FileName));
+					DepthImage = new BitmapImage(new Uri(openFileDialog.FileName.Replace(".png", "d.png")));
+				}
 			}
 		}
 
 		private void FindObstacles()
 		{
-			if (Image == null)
+			if (Image == null || DepthImage == null)
 				return;
 
 			var sp = new SuperPixels();
-			var width = Image.PixelWidth;
-			var height = Image.PixelHeight;
+			var width = DepthImage.PixelWidth;
+			var height = DepthImage.PixelHeight;
 			var size = width * height;
-			var img = new Image<Bgr, byte>(ImageUtil.BitmapImage2Bitmap(Image));
+			var img = new Image<Bgr, byte>(ImageUtil.BitmapImage2Bitmap(DepthImage));
 			var imgBuffer = new int[size * 3];
 			var labels = new int[size * 3];
 			for (var y = 0; y < height; y++)
@@ -138,12 +140,13 @@ namespace YoubotCS.ViewModel
 						}
 					}
 				}
-				if (depthCheck > 2 && !obstacleLabels.Contains(labels[index]))
+				if (depthCheck > 3 && !obstacleLabels.Contains(labels[index]))
 				{
 					obstacleLabels.Add(labels[index]);
 				}
 			}
 
+			#region visualisation
 			var currentLabel = labels[0];
 			var isObstacle = false;
 			for (var j = 0; j < height; j++)
@@ -158,7 +161,7 @@ namespace YoubotCS.ViewModel
 					if (isObstacle)
 					{
 						img.Data[j, k, 2] += 20;
-						img.Data[(int) sp.kseedsy[currentLabel], (int) sp.kseedsx[currentLabel], 1] = 255;
+						img.Data[(int)sp.kseedsy[currentLabel], (int)sp.kseedsx[currentLabel], 1] = 255;
 					}
 				}
 			}
@@ -167,8 +170,21 @@ namespace YoubotCS.ViewModel
 			{
 				img.Data[contoury[j], contourx[j], 0] = 255;
 			}
+			#endregion
+			DepthImage = ImageUtil.BitmapToImageSource(img.Bitmap);
 
-			Image = ImageUtil.BitmapToImageSource(img.Bitmap);
+			img = new Image<Bgr, byte>(ImageUtil.BitmapImage2Bitmap(Image));
+
+			var saveDirectory = Environment.CurrentDirectory + "\\samples";
+			if (!Directory.Exists(saveDirectory))
+				Directory.CreateDirectory(saveDirectory);
+
+			foreach (var label in obstacleLabels)
+			{
+				var cx = (int)sp.kseedsx[label];
+				var cy = (int)sp.kseedsy[label];
+				img.Copy(new Rectangle(cx - 16, cy - 16, 32, 32)).Save(saveDirectory + $"\\{label}-sample.png");
+			}
 		}
 	}
 }

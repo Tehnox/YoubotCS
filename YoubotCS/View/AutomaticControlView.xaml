@@ -8,8 +8,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="552" d:DesignWidth="792">
     <Grid>
-        <TextBlock FontSize="24" Text="{Binding Path=PageTitle}" />
-        <Image Height="240" Width="320" RenderTransformOrigin="0.5,0.5" Margin="10,10,450,292" Source="{Binding Path=Image}" />
+        <Border BorderThickness="1" BorderBrush="Black" Height="240" Width="320" Margin="10,10,450,292"></Border>
+        <Image Name="Image" Height="240" Width="320" RenderTransformOrigin="0.5,0.5" Margin="10,10,450,292" Source="{Binding Path=Image}" />
+        <Border BorderThickness="1" BorderBrush="Black" Height="240" Width="320" Margin="342,10,130,292"></Border>
+        <Image Name="DepthImage" Height="240" Width="320" RenderTransformOrigin="0.5,0.5" Margin="342,10,130,292" Source="{Binding Path=DepthImage}" />
         <Button Content="LoadImage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="16,260,0,0" Command="{Binding Path=LoadImageCommand}" />
         <Button Content="FindObstacles" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="96,260,0,0" Command="{Binding Path=FindObstaclesCommand}" />
     </Grid>

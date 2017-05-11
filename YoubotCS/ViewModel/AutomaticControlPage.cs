@@ -9,7 +9,7 @@ namespace YoubotCS.ViewModel
 {
 	public class AutomaticControlPage
 	{
-		public string PageTitle { get; set; }
 		public BitmapImage Image { get; set; }
+		public BitmapImage DepthImage { get; set; }
 	}
 }
