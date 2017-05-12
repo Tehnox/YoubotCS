@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using YoubotCS.NN;
+using YoubotCS.YoubotHandler;
 
 namespace YoubotCS.ViewModel
 {
@@ -9,6 +10,7 @@ namespace YoubotCS.ViewModel
 		public DataProvider DataProvider;
 		public static string StorageDirectory = Environment.CurrentDirectory + @"\dataset";
 		public NeuralNetwork Network;
+        public RobotHandler YouBotHandler;
 
 		public ICommand LoadAutomaticControlPageCommand { get; private set; }
 		public ICommand LoadManualControlPageCommand { get; private set; }
@@ -19,6 +21,8 @@ namespace YoubotCS.ViewModel
 			DataProvider.LoadDataset();
 			Network = InitNetwork();
 			LoadAutomaticControlPage();
+
+            YouBotHandler = new RobotHandler("192.168.88.25", "root", "111111");
 
 			// Hook up Commands to associated methods
 			LoadAutomaticControlPageCommand = new DelegateCommand(o => LoadAutomaticControlPage());
@@ -47,7 +51,7 @@ namespace YoubotCS.ViewModel
 		private void LoadManualControlPage()
 		{
 			CurrentViewModel = new ManualControlViewModel(
-				new ManualControlPage { PageTitle = "Manual control page." });
+				new ManualControlPage { YoubotHandler = YouBotHandler });
 		}
 
 		public NeuralNetwork InitNetwork()
