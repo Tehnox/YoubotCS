@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using YoubotCS.YoubotHandler;
 
 namespace YoubotCS.ViewModel
 {
@@ -11,5 +12,7 @@ namespace YoubotCS.ViewModel
 	{
 		public BitmapImage Image { get; set; }
 		public BitmapImage DepthImage { get; set; }
+		public RobotHandler YoubotHandler { get; set; }
+		public string BindCamerasButtonText { get; set; }
 	}
 }

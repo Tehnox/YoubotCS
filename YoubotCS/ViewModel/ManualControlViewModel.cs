@@ -14,7 +14,9 @@ namespace YoubotCS.ViewModel
 	{
         public ICommand ForwardCommand { get; private set; }
         public ICommand BackwardCommand { get; private set; }
-        public ICommand StopCommand { get; private set; }
+		public ICommand ToLeftCommand { get; private set; }
+		public ICommand ToRightCommand { get; private set; }
+		public ICommand StopCommand { get; private set; }
         public ICommand TCPConnectCommand { get; private set; }
 
         public ObservableCollection<string> LogMessagesList { get; private set; }
@@ -25,12 +27,14 @@ namespace YoubotCS.ViewModel
 
             ForwardCommand = new DelegateCommand(o => Forward());
             BackwardCommand = new DelegateCommand(o => Backward());
+			ToLeftCommand = new DelegateCommand(o => ToLeft());
+			ToRightCommand = new DelegateCommand(o => ToRight());
             StopCommand = new DelegateCommand(o => Stop());
             TCPConnectCommand = new DelegateCommand(o => YoubotHandler.TCPConnect());
 
             LogMessagesList = new ObservableCollection<string>();
 
-            YoubotHandler._sshRobot.OnShellData = s =>
+            YoubotHandler.OnShellData = s =>
             {
                 s = Regex.Replace(s, @"[^\u0000-\u007F]", string.Empty);
                 s = Regex.Replace(s, @"s/\x1b\[[0-9;]*m//g", string.Empty);
@@ -43,19 +47,6 @@ namespace YoubotCS.ViewModel
         }
 
 		public ManualControlPage Model { get; private set; }
-
-		public string PageTitle
-		{
-			get
-			{
-				return Model.PageTitle;
-			}
-			set
-			{
-				Model.PageTitle = value;
-				OnPropertyChanged("PageTitle");
-			}
-		}
 
         public RobotHandler YoubotHandler
         {
@@ -71,19 +62,26 @@ namespace YoubotCS.ViewModel
 
         private void Forward()
         {
-            YoubotHandler.TCPPublishBase(new float[3] { 0.1f, 0, 0 });
+            YoubotHandler.TCPPublishBase(new[] { 0.1f, 0, 0 });
         }
         private void Backward()
         {
-            YoubotHandler.TCPPublishBase(new float[3] { -0.1f, 0, 0 });
+            YoubotHandler.TCPPublishBase(new[] { -0.1f, 0, 0 });
         }
+		private void ToLeft()
+		{
+			YoubotHandler.TCPPublishBase(new[] { 0, -0.1f, 0 });
+		}
+		private void ToRight()
+		{
+			YoubotHandler.TCPPublishBase(new[] { 0, 0.1f, 0 });
+		}
 
-        private void Stop()
+		private void Stop()
         {
             YoubotHandler.TCPSendStop();
             YoubotHandler.TCPSendStop();
             YoubotHandler.TCPSendStop();
-
         }
 	}
 }

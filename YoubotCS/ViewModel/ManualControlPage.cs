@@ -9,7 +9,6 @@ namespace YoubotCS.ViewModel
 {
 	public class ManualControlPage
 	{
-		public string PageTitle { get; set; }
         public RobotHandler YoubotHandler { get; set; }
 	}
 }

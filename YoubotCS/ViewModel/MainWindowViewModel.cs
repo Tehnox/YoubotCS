@@ -20,13 +20,14 @@ namespace YoubotCS.ViewModel
 			DataProvider = new DataProvider(StorageDirectory);
 			DataProvider.LoadDataset();
 			Network = InitNetwork();
-			LoadAutomaticControlPage();
 
             YouBotHandler = new RobotHandler("192.168.88.25", "root", "111111");
 
 			// Hook up Commands to associated methods
 			LoadAutomaticControlPageCommand = new DelegateCommand(o => LoadAutomaticControlPage());
 			LoadManualControlPageCommand = new DelegateCommand(o => LoadManualControlPage());
+
+			LoadAutomaticControlPage();
 		}
 
 		// ViewModel that is currently bound to the ContentControl
@@ -45,7 +46,7 @@ namespace YoubotCS.ViewModel
 		private void LoadAutomaticControlPage()
 		{
 			CurrentViewModel = new AutomaticControlViewModel(
-				new AutomaticControlPage());
+				new AutomaticControlPage { YoubotHandler = YouBotHandler });
 		}
 
 		private void LoadManualControlPage()

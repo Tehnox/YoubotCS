@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using MjpegProcessor;
 using OpenTK.Graphics.ES20;
 using YoubotCS.Utils;
+using YoubotCS.YoubotHandler;
 
 namespace YoubotCS.ViewModel
 {
@@ -20,6 +24,9 @@ namespace YoubotCS.ViewModel
 		public AutomaticControlPage Model { get; private set; }
 		public ICommand LoadImageCommand { get; private set; }
 		public ICommand FindObstaclesCommand { get; private set; }
+		public ICommand BindCamerasCommand { get; private set; }
+
+		public ObservableCollection<string> LogMessagesList { get; private set; }
 
 		public AutomaticControlViewModel(AutomaticControlPage model)
 		{
@@ -27,6 +34,20 @@ namespace YoubotCS.ViewModel
 
 			LoadImageCommand = new DelegateCommand(o => LoadImage());
 			FindObstaclesCommand = new DelegateCommand(o => FindObstacles());
+			BindCamerasCommand = new DelegateCommand(o => BindCameras());
+
+			BindCamerasButtonText = "Bind Cameras";
+
+			YoubotHandler.OnShellData = s =>
+			{
+				s = Regex.Replace(s, @"[^\u0000-\u007F]", string.Empty);
+				s = Regex.Replace(s, @"s/\x1b\[[0-9;]*m//g", string.Empty);
+				s = Regex.Replace(s, @"[\r\n]+", "\r\n");
+				App.Current.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					LogMessagesList.Add(s);
+				}));
+			};
 		}
 
 		public BitmapImage Image
@@ -47,6 +68,54 @@ namespace YoubotCS.ViewModel
 				Model.DepthImage = value;
 				OnPropertyChanged("DepthImage");
 			}
+		}
+		public RobotHandler YoubotHandler
+		{
+			get
+			{
+				return Model.YoubotHandler;
+			}
+			set
+			{
+				Model.YoubotHandler = value;
+			}
+		}
+
+		public string BindCamerasButtonText
+		{
+			get { return Model.BindCamerasButtonText; }
+			set
+			{
+				Model.BindCamerasButtonText = value;
+				OnPropertyChanged("BindCamerasButtonText");
+			}
+		}
+
+		private void BindCameras()
+		{
+			if (BindCamerasButtonText == "Bind Cameras")
+			{
+				YoubotHandler.RgbFrameReady += RgbFrameReady;
+				YoubotHandler.DepthFrameReady += DepthFrameReady;
+				BindCamerasButtonText = "Unbind Cameras";
+			}
+			else
+			{
+				YoubotHandler.RgbFrameReady -= RgbFrameReady;
+				YoubotHandler.DepthFrameReady -= DepthFrameReady;
+				BindCamerasButtonText = "Bind Cameras";
+			}
+
+		}
+
+		private void DepthFrameReady(object sender, FrameReadyEventArgs e)
+		{
+			DepthImage = e.BitmapImage;
+		}
+
+		private void RgbFrameReady(object sender, FrameReadyEventArgs e)
+		{
+			Image = e.BitmapImage;
 		}
 
 		private void LoadImage()

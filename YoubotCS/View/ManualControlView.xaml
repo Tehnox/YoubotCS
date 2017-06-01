@@ -8,27 +8,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="552" d:DesignWidth="792">
     <Grid>
-        <Button Content="Forward" Width="100" Margin="10,10,682,494">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                    <i:InvokeCommandAction Command="{Binding Path=ForwardCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                    <i:InvokeCommandAction Command="{Binding Path=StopCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
+        <Button Content="Connect" Command="{Binding Path=TCPConnectCommand}" Margin="10,63,637,460"/>
+
+        <Button Content="Stop" Command="{Binding Path=StopCommand}" Margin="85,10,637,494"/>
+
+        <Button Content="Control" Margin="10,10,712,494">
+            <Button.InputBindings>
+                <KeyBinding Key="W" Command="{Binding Path=ForwardCommand}" />
+                <KeyBinding Key="S" Command="{Binding Path=BackwardCommand}" />
+                <KeyBinding Key="A" Command="{Binding Path=ToLeftCommand}" />
+                <KeyBinding Key="D" Command="{Binding Path=ToRightCommand}" />
+            </Button.InputBindings>
         </Button>
-        <Button Content="Connect" Command="{Binding Path=TCPConnectCommand}" Margin="115,10,607,494"/>
-        <ListBox x:Name="logBox" HorizontalAlignment="Left" Height="542" Margin="212,10,0,0" VerticalAlignment="Top" Width="580" ItemsSource="{Binding Path=LogMessagesList}"/>
-        <Button Content="Backward" Width="100" Margin="10,63,682,441">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                    <i:InvokeCommandAction Command="{Binding BackwardCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                    <i:InvokeCommandAction Command="{Binding StopCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </Button>
+        
+        <ListBox x:Name="LogBox" HorizontalAlignment="Left" Height="532" Margin="212,10,0,0" VerticalAlignment="Top" Width="570" ItemsSource="{Binding Path=LogMessagesList}"/>
     </Grid>
 </UserControl>
