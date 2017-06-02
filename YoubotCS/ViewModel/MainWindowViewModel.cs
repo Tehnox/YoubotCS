@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using YoubotCS.NN;
 using YoubotCS.YoubotHandler;
@@ -11,6 +13,7 @@ namespace YoubotCS.ViewModel
 		public static string StorageDirectory = Environment.CurrentDirectory + @"\dataset";
 		public NeuralNetwork Network;
         public RobotHandler YouBotHandler;
+        public ObservableCollection<string> LogMessagesList { get; private set; }
 
 		public ICommand LoadAutomaticControlPageCommand { get; private set; }
 		public ICommand LoadManualControlPageCommand { get; private set; }
@@ -22,9 +25,21 @@ namespace YoubotCS.ViewModel
 			Network = InitNetwork();
 
             YouBotHandler = new RobotHandler("192.168.88.25", "root", "111111");
+            LogMessagesList = new ObservableCollection<string>();
 
-			// Hook up Commands to associated methods
-			LoadAutomaticControlPageCommand = new DelegateCommand(o => LoadAutomaticControlPage());
+            YouBotHandler._sshRobot.OnShellData = s =>
+            {
+                s = Regex.Replace(s, @"[^\u0000-\u007F]", string.Empty);
+                s = Regex.Replace(s, @"s/\x1b\[[0-9;]*m//g", string.Empty);
+                s = Regex.Replace(s, @"[\r\n]+", "\r\n");
+                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    LogMessagesList.Add(s);
+                }));
+            };
+
+            // Hook up Commands to associated methods
+            LoadAutomaticControlPageCommand = new DelegateCommand(o => LoadAutomaticControlPage());
 			LoadManualControlPageCommand = new DelegateCommand(o => LoadManualControlPage());
 
 			LoadAutomaticControlPage();
@@ -45,14 +60,14 @@ namespace YoubotCS.ViewModel
 
 		private void LoadAutomaticControlPage()
 		{
-			CurrentViewModel = new AutomaticControlViewModel(
-				new AutomaticControlPage { YoubotHandler = YouBotHandler });
+            CurrentViewModel = new AutomaticControlViewModel(
+                new AutomaticControlPage { YoubotHandler = YouBotHandler, LogMessagesList = LogMessagesList });
 		}
 
 		private void LoadManualControlPage()
 		{
 			CurrentViewModel = new ManualControlViewModel(
-				new ManualControlPage { YoubotHandler = YouBotHandler });
+				new ManualControlPage { YoubotHandler = YouBotHandler, LogMessagesList = LogMessagesList });
 		}
 
 		public NeuralNetwork InitNetwork()

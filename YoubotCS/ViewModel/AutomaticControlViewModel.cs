@@ -26,8 +26,6 @@ namespace YoubotCS.ViewModel
 		public ICommand FindObstaclesCommand { get; private set; }
 		public ICommand BindCamerasCommand { get; private set; }
 
-		public ObservableCollection<string> LogMessagesList { get; private set; }
-
 		public AutomaticControlViewModel(AutomaticControlPage model)
 		{
 			Model = model;
@@ -37,17 +35,6 @@ namespace YoubotCS.ViewModel
 			BindCamerasCommand = new DelegateCommand(o => BindCameras());
 
 			BindCamerasButtonText = "Bind Cameras";
-
-			YoubotHandler.OnShellData = s =>
-			{
-				s = Regex.Replace(s, @"[^\u0000-\u007F]", string.Empty);
-				s = Regex.Replace(s, @"s/\x1b\[[0-9;]*m//g", string.Empty);
-				s = Regex.Replace(s, @"[\r\n]+", "\r\n");
-				App.Current.Dispatcher.BeginInvoke(new Action(() =>
-				{
-					LogMessagesList.Add(s);
-				}));
-			};
 		}
 
 		public BitmapImage Image
@@ -90,8 +77,13 @@ namespace YoubotCS.ViewModel
 				OnPropertyChanged("BindCamerasButtonText");
 			}
 		}
+        public ObservableCollection<string> LogMessagesList
+        {
+            get { return Model.LogMessagesList; }
+            set { Model.LogMessagesList = value; }
+        }
 
-		private void BindCameras()
+        private void BindCameras()
 		{
 			if (BindCamerasButtonText == "Bind Cameras")
 			{
@@ -252,7 +244,12 @@ namespace YoubotCS.ViewModel
 			{
 				var cx = (int)sp.kseedsx[label];
 				var cy = (int)sp.kseedsy[label];
-				img.Copy(new Rectangle(cx - 16, cy - 16, 32, 32)).Save(saveDirectory + $"\\{label}-sample.png");
+                var sx = Math.Max(cx - 16, 0);
+                var sy = Math.Max(cy - 16, 0);
+                sx -= cx + 16 > img.Width ? cx + 16 - img.Width : 0;
+                sy -= cy + 16 > img.Height ? cy + 16 - img.Height : 0;
+                img.Copy(new Rectangle(sx, sy, 32, 32))
+                    .Save(saveDirectory + $"\\{label}-sample.png");
 			}
 		}
 	}
