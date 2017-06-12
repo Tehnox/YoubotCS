@@ -18,18 +18,18 @@ namespace YoubotCS.YoubotHandler
 		private string _terminalName, _terminalPassword;
 
 		public event EventHandler<FrameReadyEventArgs> RgbFrameReady
-		{
-			add { _mjpegDecoderRgb.FrameReady += value; }
-			remove { _mjpegDecoderRgb.FrameReady -= value; }
-		}
+        {
+            add { _mjpegDecoderRgb.FrameReady += value; }
+            remove { _mjpegDecoderRgb.FrameReady -= value; }
+        }
 
 		public event EventHandler<FrameReadyEventArgs> DepthFrameReady
-		{
-			add { _mjpegDecoderD.FrameReady += value; }
-			remove { _mjpegDecoderD.FrameReady -= value; }
-		}
+        {
+            add { _mjpegDecoderD.FrameReady += value; }
+            remove { _mjpegDecoderD.FrameReady -= value; }
+        }
 
-		private MjpegDecoder _mjpegDecoderRgb;
+        private MjpegDecoder _mjpegDecoderRgb;
 		private MjpegDecoder _mjpegDecoderD;
 
 		public RobotHandler(string robotIP, string terminalName, string terminalPassword)
@@ -41,8 +41,8 @@ namespace YoubotCS.YoubotHandler
 			InitSSH();
 			_sshRobot.ssh_connect();
             _sshRobot.Send("roslaunch youbot_tactical_level ytl.launch");
-			//SetupVideoEncoders();
-			//_tcpRobot = new RobotConnectionTCP(IP);
+            //SetupVideoEncoders();
+            //_tcpRobot = new RobotConnectionTCP(IP);
 		}
 		#region Helpers
 
@@ -120,6 +120,7 @@ namespace YoubotCS.YoubotHandler
         public void TCPConnect()
         {
             _tcpRobot = new RobotConnectionTCP(IP);
+            SetupVideoEncoders();
         }
 
 		private void SetupVideoEncoders()
@@ -130,5 +131,5 @@ namespace YoubotCS.YoubotHandler
 			_mjpegDecoderRgb.ParseStream(new Uri($"http://{IP}:8080/stream?topic=/camera/rgb/image_raw&width=640&height=480&quality=50"));
 			_mjpegDecoderD.ParseStream(new Uri($"http://{IP}:8080/stream?topic=/camera/depth_registered/image_raw&width=640&height=480&quality=50"));
 		}
-	}
+    }
 }
