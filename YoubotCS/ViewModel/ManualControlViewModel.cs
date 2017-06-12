@@ -19,8 +19,6 @@ namespace YoubotCS.ViewModel
 		public ICommand StopCommand { get; private set; }
         public ICommand TCPConnectCommand { get; private set; }
 
-        public ObservableCollection<string> LogMessagesList { get; private set; }
-
         public ManualControlViewModel(ManualControlPage model)
 		{
 			Model = model;
@@ -31,19 +29,6 @@ namespace YoubotCS.ViewModel
 			ToRightCommand = new DelegateCommand(o => ToRight());
             StopCommand = new DelegateCommand(o => Stop());
             TCPConnectCommand = new DelegateCommand(o => YoubotHandler.TCPConnect());
-
-            LogMessagesList = new ObservableCollection<string>();
-
-            YoubotHandler.OnShellData = s =>
-            {
-                s = Regex.Replace(s, @"[^\u0000-\u007F]", string.Empty);
-                s = Regex.Replace(s, @"s/\x1b\[[0-9;]*m//g", string.Empty);
-                s = Regex.Replace(s, @"[\r\n]+", "\r\n");
-                App.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    LogMessagesList.Add(s);
-                }));
-            };
         }
 
 		public ManualControlPage Model { get; private set; }
@@ -59,8 +44,13 @@ namespace YoubotCS.ViewModel
                 Model.YoubotHandler = value;
             }
         }
+		public ObservableCollection<string> LogMessagesList
+		{
+			get { return Model.LogMessagesList; }
+			set { Model.LogMessagesList = value; }
+		}
 
-        private void Forward()
+		private void Forward()
         {
             YoubotHandler.TCPPublishBase(new[] { 0.1f, 0, 0 });
         }

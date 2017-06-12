@@ -11,15 +11,23 @@ namespace YoubotCS.YoubotHandler
 {
 	public class RobotHandler
 	{
-		SSHWrapper _sshRobot; //команды ssh
+		public SSHWrapper _sshRobot; //команды ssh
 		RobotConnectionTCP _tcpRobot; //команда программе YTL
 
 		public string IP;
 		private string _terminalName, _terminalPassword;
 
-		public SSHWrapper.OnShellDataDel OnShellData;
-		public EventHandler<FrameReadyEventArgs> RgbFrameReady;
-		public EventHandler<FrameReadyEventArgs> DepthFrameReady;
+		public event EventHandler<FrameReadyEventArgs> RgbFrameReady
+		{
+			add { _mjpegDecoderRgb.FrameReady += value; }
+			remove { _mjpegDecoderRgb.FrameReady -= value; }
+		}
+
+		public event EventHandler<FrameReadyEventArgs> DepthFrameReady
+		{
+			add { _mjpegDecoderD.FrameReady += value; }
+			remove { _mjpegDecoderD.FrameReady -= value; }
+		}
 
 		private MjpegDecoder _mjpegDecoderRgb;
 		private MjpegDecoder _mjpegDecoderD;
@@ -33,7 +41,8 @@ namespace YoubotCS.YoubotHandler
 			InitSSH();
 			_sshRobot.ssh_connect();
             _sshRobot.Send("roslaunch youbot_tactical_level ytl.launch");
-            //_tcpRobot = new RobotConnectionTCP(IP);
+			//SetupVideoEncoders();
+			//_tcpRobot = new RobotConnectionTCP(IP);
 		}
 		#region Helpers
 
@@ -41,7 +50,6 @@ namespace YoubotCS.YoubotHandler
 		{
 			_sshRobot = new SSHWrapper(IP, _terminalName, _terminalPassword); //root:111111
 
-			OnShellData = _sshRobot.OnShellData;
 			//TODO: process shell output
 			//_sshRobot.OnShellData = s => lo.Invoke(new Action(() =>
 			//{
@@ -119,11 +127,8 @@ namespace YoubotCS.YoubotHandler
 			_mjpegDecoderRgb = new MjpegDecoder();
 			_mjpegDecoderD = new MjpegDecoder();
 
-			_mjpegDecoderRgb.ParseStream(new Uri($"http://{IP}:8080/stream?topic=topic&width=600&height=480&quality=50"));
-			_mjpegDecoderD.ParseStream(new Uri($"http://{IP}:8080/stream?topic=topic&width=600&height=480&quality=50"));
-
-			_mjpegDecoderRgb.FrameReady += RgbFrameReady;
-			_mjpegDecoderD.FrameReady += DepthFrameReady;
+			_mjpegDecoderRgb.ParseStream(new Uri($"http://{IP}:8080/stream?topic=/camera/rgb/image_raw&width=640&height=480&quality=50"));
+			_mjpegDecoderD.ParseStream(new Uri($"http://{IP}:8080/stream?topic=/camera/depth_registered/image_raw&width=640&height=480&quality=50"));
 		}
 	}
 }

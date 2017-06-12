@@ -7,7 +7,7 @@
         xmlns:viewModel="clr-namespace:YoubotCS.ViewModel"
         xmlns:view="clr-namespace:YoubotCS.View"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800
+        Title= "{Binding Path=Status}" Height="600" Width="800
         ">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:AutomaticControlViewModel}">

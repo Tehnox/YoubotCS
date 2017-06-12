@@ -14,8 +14,6 @@ namespace YoubotCS.NN
 
 		public delegate void LossFunctionActionDelegate(int correctClass);
 
-		public delegate int RecognizedDelegate();
-
 		private double _max = 1D;
 
 		private double _min = -1D;
@@ -23,16 +21,27 @@ namespace YoubotCS.NN
 		public int CurrentEpoch;
 		public TimeSpan EpochDuration;
 		public GetSampleLossDelegate GetSampleLoss;
+		public event ChangedEventHandler StatusChanged;
 
 		public Layer[] Layers;
 		public LossFunctionActionDelegate LossFunctionAction;
 		public ParallelOptions ParallelOption;
 		public ThreadSafeRandom RandomGenerator;
-		public RecognizedDelegate Recognized;
 		public int SampleIndex;
 
-		public bool Stopped;
+		private bool _stopped;
 		public int TotalEpochs;
+
+		private string _status;
+		private string status
+		{
+			get { return _status; }
+			set
+			{
+				_status = value;
+				OnChanged(_status);
+			}
+		}
 
 		public NeuralNetwork(DataProvider dataprovider, string name = "Neural Network", int classCount = 10,
 			double trainTo = 0.8D,
@@ -45,7 +54,6 @@ namespace YoubotCS.NN
 			TrainToValue = trainTo;
 			LossFunctionAction = MeanSquareErrorLossFunction;
 			GetSampleLoss = GetSampleLossMSE;
-			Recognized = ArgMax;
 
 			dMicron = dmicron;
 			Min = min;
@@ -60,6 +68,7 @@ namespace YoubotCS.NN
 				TaskScheduler = null,
 				MaxDegreeOfParallelism = Environment.ProcessorCount
 			};
+			status = "Idle";
 		}
 
 		public DataProvider DataProvider { get; }
@@ -273,10 +282,10 @@ namespace YoubotCS.NN
 		public void TrainingTask() //TODO: repair save mechanism based on best score
 		{
 			var oldSaveWeightsFileName = string.Empty;
-			var bestScore = (int) (DataProvider.SamplesCount / 100D * 80d);
+			//var bestScore = (int) (DataProvider.SamplesCount / 100D * 80d);
 			var sampleSize = DataProvider.SampleSize*DataProvider.SampleChannels;
 			TotalEpochs = 100;
-			Stopped = false;
+			_stopped = false;
 			CurrentEpoch = 0;
 			while (CurrentEpoch < TotalEpochs)
 			{
@@ -288,6 +297,7 @@ namespace YoubotCS.NN
 
 				for (SampleIndex = 0; SampleIndex < DataProvider.SamplesCount; SampleIndex++)
 				{
+					status = $"Epoch:  {CurrentEpoch}/{TotalEpochs}, sample: {SampleIndex}/{DataProvider.SamplesCount}, avg loss: {AvgTrainLoss}";
 					for (var i = 0; i < sampleSize; i++)
 						Layers[0].Neurons[i].Output =
 							DataProvider.Samples[DataProvider.RandomSample[SampleIndex]].Image[i] / 255D * Spread + Min;
@@ -319,8 +329,11 @@ namespace YoubotCS.NN
 						Layers[i].UpdateWeights();
 					}
 
-					if (Stopped)
+					if (_stopped)
+					{
+						status = "Idle";
 						return;
+					}
 				}
 				// epoch save
 				SaveWeights(DataProvider.DataDirectory + @"\weights\" + Name + " (epoch " + CurrentEpoch + " - " +
@@ -365,6 +378,15 @@ namespace YoubotCS.NN
 				Layers[0].Neurons[i].Output = image[i]/255D*Spread + Min;
 			Calculate();
 			return LastLayer.GetOutput();
+		}
+		protected virtual void OnChanged(string status)
+		{
+			StatusChanged?.Invoke(status);
+		}
+
+		public void Stop()
+		{
+			_stopped = true;
 		}
 	}
 }

@@ -20,6 +20,16 @@
         <ListBox x:Name="LogBox" HorizontalAlignment="Left" Height="282" Margin="342,260,0,0" VerticalAlignment="Top" Width="440" ItemsSource="{Binding Path=LogMessagesList}"/>
         <Button Content="{Binding Path=BindCamerasButtonText}" HorizontalAlignment="Left" VerticalAlignment="Top" 
                 Width="110" Height="25" Margin="16,260,0,0" Command="{Binding Path=BindCamerasCommand}" />
+        <Button Content="Load dataset" HorizontalAlignment="Left" VerticalAlignment="Top" 
+        	Width="111" Height="20" Margin="669,93,0,0" Command="{Binding LoadDatasetCommand}" />
+        <Button Content="Train NN" HorizontalAlignment="Left" VerticalAlignment="Top" 
+        	Width="111" Height="20" Margin="669,118,0,0" Command="{Binding TrainCommand}" />
+        <Button Content="Test NN" HorizontalAlignment="Left" VerticalAlignment="Top" 
+        	Width="111" Height="20" Margin="669,143,0,0" Command="{Binding TestCommand}" />
+        <Button Content="Load weights" HorizontalAlignment="Left" VerticalAlignment="Top" 
+        	Width="110" Height="25" Margin="16,290,0,0" Command="{Binding LoadWeightsCommand}" />
+        <Button Content="Save weights" HorizontalAlignment="Left" VerticalAlignment="Top" 
+        	Width="110" Height="25" Margin="16,320,0,0" Command="{Binding SaveWeightsCommand}" />
 
     </Grid>
 </UserControl>
